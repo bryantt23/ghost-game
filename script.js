@@ -10,6 +10,8 @@ function readTextFile(file) {
           var allText = rawFile.responseText;
           return resolve(allText.split('\n'));
         }
+      } else {
+        reject('failed');
       }
     };
     rawFile.send(null);
@@ -18,8 +20,30 @@ function readTextFile(file) {
 
 async function buildDictionary() {
   const dictionary = await readTextFile('./dictionary.txt');
-  console.log(dictionary);
+  return dictionary;
 }
 
-buildDictionary();
-// console.log(readTextFile('./dictionary.txt'));
+class Player {
+  constructor(name) {
+    this.name = name;
+  }
+
+  guess() {}
+
+  alertInvalidGuess() {}
+}
+
+class Game {
+  constructor(dictionary, player1, player2) {
+    this.fragment = '';
+    this.dictionary = dictionary;
+  }
+}
+
+async function start() {
+  const dict = await buildDictionary();
+  const game = new Game(dict);
+  console.log(game);
+}
+
+start();
