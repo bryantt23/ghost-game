@@ -31,7 +31,7 @@ class Player {
   guess = () => {
     const letter = prompt(`${this.name} Enter a letter`);
     if (!letter) {
-      return;
+      throw Error('leaving');
     }
     return letter;
   };
@@ -55,6 +55,7 @@ class Game {
       this.takeTurn(this.currentPlayer);
       console.log(`The current fragment is: ${this.fragment}`);
     }
+    return this.previousPlayer;
   }
 
   nextPlayer() {
@@ -92,13 +93,67 @@ class Game {
   }
 }
 
+class GameManager {
+  constructor(player1, player2) {
+    this.player1 = player1;
+    this.player2 = player2;
+    this.score = this.generateScore(player1, player2);
+  }
+
+  generateScore(player1, player2) {
+    return {
+      [player1.name]: 0,
+      [player2.name]: 0
+    };
+  }
+
+  resetScore(player1, player2) {
+    return { [player1.name]: 0, [player2.name]: 0 };
+  }
+
+  displayStandings() {
+    const str = 'GHOST';
+    const p1String = str.substring(0, this.score[this.player1.name]);
+    const p2String = str.substring(0, this.score[this.player2.name]);
+    console.log(`${this.player1.name} has a status of ${p1String}`);
+    console.log(`${this.player2.name} has a status of ${p2String}`);
+  }
+
+  start(dictionary) {
+    while (!this.isGameOver()) {
+      const game = new Game(dictionary, this.player1, this.player2);
+      const loser = game.start();
+      console.log(loser);
+      this.updateScore(loser);
+      this.displayStandings();
+      console.log(JSON.stringify(this));
+    }
+    console.log(JSON.stringify(this.score));
+  }
+
+  updateScore(loser) {
+    this.score[loser.name]++;
+  }
+
+  isGameOver() {
+    for (let x of Object.values(this.score)) {
+      if (x === 5) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
 async function start() {
   const dict = await buildDictionary();
   const player1 = new Player('Abe'),
     player2 = new Player('Bri');
-  const game = new Game(dict, player1, player2);
-  console.log(game);
-  game.start();
+  const gameManager = new GameManager(player1, player2);
+  gameManager.start(dict);
+  console.log(gameManager);
+  // console.log(game);
+  // game.start();
 }
 
 start();
