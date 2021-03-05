@@ -159,6 +159,9 @@ class GameManager {
 
     delete this.score[loserName];
     console.log(this.score);
+    const index = this.players.findIndex(obj => obj.name === loserName);
+    this.players.splice(index, index + 1);
+    console.log(JSON.stringify(this.players));
 
     if (Object.keys(this.score).length === 1) {
       console.log(`The winner is ${Object.keys(this.score)[0]}!!!`);
@@ -172,7 +175,7 @@ async function start() {
   const player1 = new Player('Abe'),
     player2 = new Player('Bri'),
     player3 = new Player('Cat');
-  const gameManager = new GameManager([player1, player2]);
+  const gameManager = new GameManager([player1, player2, player3]);
   gameManager.start(dict);
   console.log(gameManager);
   // console.log(game);
