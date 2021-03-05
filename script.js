@@ -56,15 +56,11 @@ class Game {
       console.log(`The current fragment is: ${this.fragment}`);
     }
     console.log(' Loser is', this.players[this.currentIndex]);
-    // return this.previousPlayer;
     return this.players[this.currentIndex];
   }
 
   nextPlayer() {
     this.currentIndex = (this.currentIndex + 1) % this.players.length;
-    // let temp = this.currentPlayer;
-    // this.currentPlayer = this.previousPlayer;
-    // this.previousPlayer = temp;
   }
 
   takeTurn(player) {
@@ -99,7 +95,7 @@ class Game {
 }
 
 class GameManager {
-  targetCount = 2;
+  targetCount = 1;
   constructor(players) {
     this.players = players;
     this.score = this.generateScore(players);
@@ -146,12 +142,28 @@ class GameManager {
   }
 
   isGameOver() {
-    for (let x of Object.values(this.score)) {
-      if (x === this.targetCount) {
-        return true;
+    let loserName;
+    for (let x of Object.entries(this.score)) {
+      console.log(x);
+      const [name, count] = x;
+      if (count === this.targetCount) {
+        loserName = name;
       }
     }
-    return false;
+
+    console.log(loserName);
+
+    if (!loserName) {
+      return false;
+    }
+
+    delete this.score[loserName];
+    console.log(this.score);
+
+    if (Object.keys(this.score).length === 1) {
+      console.log(`The winner is ${Object.keys(this.score)[0]}!!!`);
+      return true;
+    }
   }
 }
 
