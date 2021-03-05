@@ -42,26 +42,29 @@ class Player {
 }
 
 class Game {
-  constructor(dictionary, player1, player2) {
+  constructor(dictionary, players) {
     this.fragment = '';
     this.dictionary = new Set(dictionary);
-    this.currentPlayer = player1;
-    this.previousPlayer = player2;
+    this.currentIndex = 0;
+    this.players = players;
   }
 
   start() {
     console.log(this.isGameOver());
     while (!this.isGameOver()) {
-      this.takeTurn(this.currentPlayer);
+      this.takeTurn(this.players[this.currentIndex]);
       console.log(`The current fragment is: ${this.fragment}`);
     }
-    return this.previousPlayer;
+    console.log(' Loser is', this.players[this.currentIndex]);
+    // return this.previousPlayer;
+    return this.players[this.currentIndex];
   }
 
   nextPlayer() {
-    let temp = this.currentPlayer;
-    this.currentPlayer = this.previousPlayer;
-    this.previousPlayer = temp;
+    this.currentIndex = (this.currentIndex + 1) % this.players.length;
+    // let temp = this.currentPlayer;
+    // this.currentPlayer = this.previousPlayer;
+    // this.previousPlayer = temp;
   }
 
   takeTurn(player) {
@@ -71,7 +74,9 @@ class Game {
     if (this.isValidPlay(tempFragment)) {
       this.fragment = tempFragment;
       console.log(`${player.name} has made the fragment into ${this.fragment}`);
-      this.nextPlayer();
+      if (!this.isGameOver()) {
+        this.nextPlayer();
+      }
     } else {
       player.alertInvalidGuess();
     }
@@ -86,7 +91,7 @@ class Game {
 
   isGameOver() {
     if (this.dictionary.has(this.fragment)) {
-      console.log(`Game over. The winner is ${this.currentPlayer.name}`);
+      console.log('Loser is', this.players[this.currentIndex]);
       return true;
     }
     return;
@@ -94,34 +99,39 @@ class Game {
 }
 
 class GameManager {
-  constructor(player1, player2) {
-    this.player1 = player1;
-    this.player2 = player2;
-    this.score = this.generateScore(player1, player2);
+  targetCount = 2;
+  constructor(players) {
+    this.players = players;
+    this.score = this.generateScore(players);
   }
 
-  generateScore(player1, player2) {
-    return {
-      [player1.name]: 0,
-      [player2.name]: 0
-    };
+  generateScore(players) {
+    let score = {};
+    players.forEach(player => {
+      score[player.name] = 0;
+    });
+    return score;
   }
 
-  resetScore(player1, player2) {
-    return { [player1.name]: 0, [player2.name]: 0 };
+  resetScore(players) {
+    return this.generateScore(players);
   }
 
   displayStandings() {
     const str = 'GHOST';
-    const p1String = str.substring(0, this.score[this.player1.name]);
-    const p2String = str.substring(0, this.score[this.player2.name]);
-    console.log(`${this.player1.name} has a status of ${p1String}`);
-    console.log(`${this.player2.name} has a status of ${p2String}`);
+    // const p2String = str.substring(0, this.score[this.player2.name]);
+    // console.log(`${this.player1.name} has a status of ${p1String}`);
+    // console.log(`${this.player2.name} has a status of ${p2String}`);
+
+    this.players.forEach(player => {
+      const pString = str.substring(0, this.score[player.name]);
+      console.log(`${player.name} has a status of ${pString}`);
+    });
   }
 
   start(dictionary) {
     while (!this.isGameOver()) {
-      const game = new Game(dictionary, this.player1, this.player2);
+      const game = new Game(dictionary, this.players);
       const loser = game.start();
       console.log(loser);
       this.updateScore(loser);
@@ -137,7 +147,7 @@ class GameManager {
 
   isGameOver() {
     for (let x of Object.values(this.score)) {
-      if (x === 5) {
+      if (x === this.targetCount) {
         return true;
       }
     }
@@ -148,8 +158,9 @@ class GameManager {
 async function start() {
   const dict = await buildDictionary();
   const player1 = new Player('Abe'),
-    player2 = new Player('Bri');
-  const gameManager = new GameManager(player1, player2);
+    player2 = new Player('Bri'),
+    player3 = new Player('Cat');
+  const gameManager = new GameManager([player1, player2]);
   gameManager.start(dict);
   console.log(gameManager);
   // console.log(game);
